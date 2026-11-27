@@ -1,0 +1,13 @@
+{
+  "name": "agi-engine-v2",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "本地优先的个人 AI 工作台：自带 API Key，记忆与对话只存在本机。",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/core.test.js",
+    "check": "node --check js/core.js && node --check js/config.js && node --check js/llm.js && node --check js/entitlement.js && node --check js/app.js"
+  },
+  "engines": { "node": ">=18" }
+}
