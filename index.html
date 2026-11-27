@@ -6,9 +6,10 @@
 <meta name="theme-color" content="#0b0c10">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
 <meta name="referrer" content="no-referrer">
-<title>AGI Engine — 本地优先的个人 AI 工作台</title>
-<meta name="description" content="自带 API Key 的个人 AI 工作台：记忆与对话只存在你的浏览器里，没有账号，没有服务器。">
+<title>AGI Engine — 把你的 AI 记忆变成一份可带走的资产</title>
+<meta name="description" content="把散落在无数对话里的偏好、事实、计划，编译成一份任何模型都能读的 you.md。本机生成，无账号，无服务器，加密可带走。">
 <link rel="stylesheet" href="./assets/app.css">
+<link rel="stylesheet" href="./assets/toolkit.css">
 </head>
 <body>
 
@@ -16,24 +17,31 @@
 <section id="view-landing">
   <div class="hero">
     <div class="mark">⬡</div>
-    <h1>你的个人 AI，跑在你自己的浏览器里</h1>
-    <p class="lead">自带模型 Key，记忆与对话只存在本机。没有账号，没有云同步，也没有"帮你训练"的隐藏用途。</p>
+    <h1>把你和 AI 说过的话，变成一份任何模型都能读的记忆资产</h1>
+    <p class="lead">
+      它不替代 ChatGPT。它只做一件事：把你散在几十次对话里的偏好、事实、计划，
+      编译成一份明文可读的 <code>you.md</code>——换模型、换设备、断网，这份东西还是你的。
+    </p>
 
     <ul class="pills">
-      <li>本地优先</li>
-      <li>自带模型 Key</li>
+      <li>本机生成</li>
       <li>无账号 · 无服务器</li>
-      <li>源码可审计</li>
+      <li>自带模型 Key</li>
+      <li>明文可读 · 可 diff</li>
+      <li>加密备份可带走</li>
     </ul>
 
     <div class="hero-actions">
       <button id="enterBtn" class="btn primary">开始使用（免费）</button>
+      <a class="btn ghost" href="./docs/EXAMPLE-CONTEXT.md">先看它长什么样</a>
     </div>
 
     <p class="fineprint">
-      免费版：10 条记忆 / 每天 20 条对话。模型费用由你自己的 Key 承担，我们不代收也不转售模型额度。
+      免费：本机记忆 10 条 / 每天 20 条对话。Pro 买断 <strong>$19</strong>（原价 $39，前 100 份）：
+      不限条数 + 完整上下文包 + 加密备份导出/恢复。模型费用由你自己的 Key 承担，我们不代收也不转售模型额度。
     </p>
     <p class="fineprint">
+      <a href="./docs/STRATEGY.md">为什么这么设计</a> ·
       <a href="./docs/AUDIT.md">重构说明</a> ·
       <a href="./PRIVACY.md">隐私</a> ·
       <a href="./TERMS.md">条款与退款</a> ·
@@ -69,8 +77,8 @@
         <h2>三步跑通</h2>
         <ol class="steps">
           <li>到「设置」填入你自己的模型 Key，或启动本地 Ollama（不需要 Key）。</li>
-          <li>在「记忆」里写下几条偏好，对话时会自动带上。</li>
-          <li>在「对话」里问第一个问题。所有内容只留在本机。</li>
+          <li>在「记忆」里写下几条偏好；对话时会自动带上它们。</li>
+          <li>攒够 5 条后，到「记忆 → 资产工具箱」编译成 <code>you.md</code>，粘到任何模型开头都管用。</li>
         </ol>
       </div>
 
@@ -112,6 +120,7 @@
 
     <!-- 记忆 -->
     <section id="panel-memory" class="panel">
+      <div id="toolkitCard"></div>
       <div class="card">
         <h2>记忆</h2>
         <p class="muted small">只有你保存在这里的条目会被带进对话上下文。没有加密承诺，也不上传。</p>
@@ -142,16 +151,15 @@
 
       <div id="planCards">
         <div class="card plan">
-          <h3>月度</h3>
-          <div class="price">$15<span>/月</span></div>
-          <p class="muted small">按月续费，随时取消。</p>
-          <button id="buyMonthly" class="btn primary" disabled>购买通道未接入</button>
-        </div>
-        <div class="card plan">
-          <h3>年度</h3>
-          <div class="price">$100<span>/年</span></div>
-          <p class="muted small">相当于 $8.33/月，省 44%。</p>
-          <button id="buyAnnual" class="btn ghost" disabled>购买通道未接入</button>
+          <h3>Pro 买断（一次付费，不再续费）</h3>
+          <div class="price">$19<span> / 原价 $39</span></div>
+          <ul class="plain">
+            <li>记忆与对话不限条数</li>
+            <li>完整上下文包（1500 tokens 预算，可复制/下载 .md）</li>
+            <li>加密备份导出与恢复（AES-256-GCM，口令只在你设备上）</li>
+            <li>授权码本机离线校验，不联网、不需要账号</li>
+          </ul>
+          <button id="buyPro" class="btn primary" disabled>购买通道未接入</button>
         </div>
         <p id="checkoutNote" class="hint"></p>
       </div>
@@ -159,11 +167,15 @@
       <div class="card">
         <h2>已有授权码</h2>
         <form id="licenseForm" class="inline-form">
-          <input id="licenseInput" type="text" placeholder="AGI-XXXX-XXXX-XXXX" autocomplete="off">
+          <input id="licenseInput" type="text" placeholder="AGIP1.xxxxx.yyyyy" autocomplete="off">
           <button class="btn primary" type="submit">激活</button>
         </form>
         <p id="licenseMsg" class="hint"></p>
-        <p class="muted small">授权码在服务端校验，校验结果（套餐与到期日）保存在本机。没有服务端就无法激活，这是刻意的。</p>
+        <p class="muted small">
+          授权码用 ECDSA 公钥在本机校验，不联网、不需要账号。想先体验：
+          <a href="https://github.com/Fnhiq23/agi-engine-v2/blob/main/demo/license-demo.txt">取一张演示码</a>
+          （有效期到 2026-12-31，仅供体验）。
+        </p>
       </div>
     </section>
 
@@ -222,6 +234,7 @@
   </main>
 
   <footer class="foot">
+    <a href="./docs/STRATEGY.md">为什么这么设计</a>
     <a href="./docs/AUDIT.md">重构说明</a>
     <a href="./PRIVACY.md">隐私</a>
     <a href="./TERMS.md">条款与退款</a>
@@ -232,5 +245,6 @@
 </section>
 
 <script type="module" src="./js/app.js"></script>
+<script type="module" src="./js/toolkit.js"></script>
 </body>
 </html>
