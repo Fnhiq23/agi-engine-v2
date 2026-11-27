@@ -201,7 +201,7 @@ export const LLM = {
       return { content, usage: { inputTokens, outputTokens } };
     } catch (err) {
       if (err.name === 'AbortError') return { error: 'TIMEOUT', message: '请求超时，请检查网络或本地服务。' };
-      return { error: 'NETWORK', message: '网络错误或接口拒绝浏览器跳域请求。' };
+      return { error: 'NETWORK', message: '网络错误或接口拒绝浏览器跨域请求。' };
     } finally {
       clearTimeout(timer);
     }

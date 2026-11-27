@@ -86,5 +86,5 @@ test('Key 掩码不泄露完整内容', () => {
   const masked = maskKey('sk-1234567890abcdef');
   assert.ok(masked.startsWith('sk-1'));
   assert.ok(masked.endsWith('cdef'));
-  assert.ok(!masked.includes('....'));
+  assert.ok(!masked.includes('234567890'));
 });
