@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0c10">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
+<meta name="referrer" content="no-referrer">
+<title>AGI Engine — 本地优先的个人 AI 工作台</title>
+<meta name="description" content="自带 API Key 的个人 AI 工作台：记忆与对话只存在你的浏览器里，没有账号，没有服务器。">
+<link rel="stylesheet" href="./assets/app.css">
+</head>
+<body>
+
+<!-- 落地页 -->
+<section id="view-landing">
+  <div class="hero">
+    <div class="mark">⬡</div>
+    <h1>你的个人 AI，跑在你自己的浏览器里</h1>
+    <p class="lead">自带模型 Key，记忆与对话只存在本机。没有账号，没有云同步，也没有"帮你训练"的隐藏用途。</p>
+
+    <ul class="pills">
+      <li>本地优先</li>
+      <li>自带模型 Key</li>
+      <li>无账号 · 无服务器</li>
+      <li>源码可审计</li>
+    </ul>
+
+    <div class="hero-actions">
+      <button id="enterBtn" class="btn primary">开始使用（免费）</button>
+    </div>
+
+    <p class="fineprint">
+      免费版：10 条记忆 / 每天 20 条对话。模型费用由你自己的 Key 承担，我们不代收也不转售模型额度。
+    </p>
+    <p class="fineprint">
+      <a href="./docs/AUDIT.md">重构说明</a> ·
+      <a href="./PRIVACY.md">隐私</a> ·
+      <a href="./TERMS.md">条款与退款</a> ·
+      <a href="https://github.com/Fnhiq23/agi-engine-v2">源码</a>
+    </p>
+  </div>
+</section>
+
+<!-- 主应用 -->
+<section id="view-app" hidden>
+  <header class="topbar">
+    <div class="brand"><span class="dot"></span> AGI Engine</div>
+    <div class="topbar-right">
+      <span id="proBadge" class="badge">免费版</span>
+      <span id="streakBadge" class="chip">🔥 0 天</span>
+      <span id="lvBadge" class="chip">Lv.1</span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="home" class="active">首页</button>
+    <button data-tab="chat">对话</button>
+    <button data-tab="memory">记忆</button>
+    <button data-tab="achv">成就</button>
+    <button data-tab="pro">Pro</button>
+    <button data-tab="settings">设置</button>
+  </nav>
+
+  <main>
+    <!-- 首页 -->
+    <section id="panel-home" class="panel active">
+      <div class="card" id="setupCard">
+        <h2>三步跑通</h2>
+        <ol class="steps">
+          <li>到「设置」填入你自己的模型 Key，或启动本地 Ollama（不需要 Key）。</li>
+          <li>在「记忆」里写下几条偏好，对话时会自动带上。</li>
+          <li>在「对话」里问第一个问题。所有内容只留在本机。</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h2>这周的进度</h2>
+        <div class="metrics">
+          <div class="metric"><span id="statMemories">0</span><label>记忆</label></div>
+          <div class="metric"><span id="statChats">0</span><label>轮对话</label></div>
+          <div class="metric"><span id="statLevel">1</span><label>等级</label></div>
+          <div class="metric"><span id="statStreak">0</span><label>连续天数</label></div>
+        </div>
+        <div class="xp">
+          <div class="xp-bar"><div id="xpBar"></div></div>
+          <div id="xpText" class="muted small">0 / 100 XP</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>今日额度</h2>
+        <p id="quotaText" class="muted"></p>
+      </div>
+
+      <div class="card">
+        <h2>每日签到</h2>
+        <p class="muted" id="claimHint"></p>
+        <button id="claimBtn" class="btn primary">领取今日奖励</button>
+      </div>
+    </section>
+
+    <!-- 对话 -->
+    <section id="panel-chat" class="panel">
+      <div id="chatLog" class="chat-log"></div>
+      <form id="chatForm" class="composer">
+        <textarea id="chatInput" rows="2" placeholder="问点什么…（Enter 发送，Shift+Enter 换行）"></textarea>
+        <button class="btn primary" type="submit">发送</button>
+      </form>
+      <p id="chatHint" class="hint"></p>
+    </section>
+
+    <!-- 记忆 -->
+    <section id="panel-memory" class="panel">
+      <div class="card">
+        <h2>记忆</h2>
+        <p class="muted small">只有你保存在这里的条目会被带进对话上下文。没有加密承诺，也不上传。</p>
+        <form id="memoryForm" class="inline-form">
+          <input id="memoryInput" type="text" placeholder="例如：我不喝含糖饮料" autocomplete="off">
+          <button class="btn primary" type="submit">保存</button>
+        </form>
+        <p id="memoryHint" class="hint"></p>
+      </div>
+      <div id="memoryList" class="mem-list"></div>
+    </section>
+
+    <!-- 成就 -->
+    <section id="panel-achv" class="panel">
+      <div class="card">
+        <h2>成就</h2>
+        <p class="muted small">全部基于本机使用记录，不涉及排行榜或社会比较。</p>
+      </div>
+      <div id="achvList"></div>
+    </section>
+
+    <!-- Pro -->
+    <section id="panel-pro" class="panel">
+      <div class="card">
+        <h2>Pro</h2>
+        <div id="proStatus"></div>
+      </div>
+
+      <div id="planCards">
+        <div class="card plan">
+          <h3>月度</h3>
+          <div class="price">$15<span>/月</span></div>
+          <p class="muted small">按月续费，随时取消。</p>
+          <button id="buyMonthly" class="btn primary" disabled>购买通道未接入</button>
+        </div>
+        <div class="card plan">
+          <h3>年度</h3>
+          <div class="price">$100<span>/年</span></div>
+          <p class="muted small">相当于 $8.33/月，省 44%。</p>
+          <button id="buyAnnual" class="btn ghost" disabled>购买通道未接入</button>
+        </div>
+        <p id="checkoutNote" class="hint"></p>
+      </div>
+
+      <div class="card">
+        <h2>已有授权码</h2>
+        <form id="licenseForm" class="inline-form">
+          <input id="licenseInput" type="text" placeholder="AGI-XXXX-XXXX-XXXX" autocomplete="off">
+          <button class="btn primary" type="submit">激活</button>
+        </form>
+        <p id="licenseMsg" class="hint"></p>
+        <p class="muted small">授权码在服务端校验，校验结果（套餐与到期日）保存在本机。没有服务端就无法激活，这是刻意的。</p>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section id="panel-settings" class="panel">
+      <div class="card">
+        <h2>模型连接</h2>
+        <p class="muted small">Key 只存在这台设备的浏览器里，直接发给你选定的模型厂商，或你本机的服务。</p>
+
+        <label class="field">
+          <span>服务商</span>
+          <select id="provider"></select>
+        </label>
+
+        <label class="field">
+          <span>模型</span>
+          <input id="model" type="text" placeholder="gpt-4o-mini" autocomplete="off">
+        </label>
+
+        <label class="field">
+          <span>接口地址（可选）</span>
+          <input id="baseUrl" type="text" placeholder="默认使用服务商官方地址" autocomplete="off">
+        </label>
+
+        <label class="field">
+          <span>API Key</span>
+          <input id="apiKey" type="password" placeholder="sk-..." autocomplete="off">
+        </label>
+
+        <label class="check">
+          <input id="persist" type="checkbox">
+          <span>在这台设备记住 Key（默认只在本次会话有效）</span>
+        </label>
+
+        <div class="row">
+          <button id="saveLlm" class="btn primary">保存</button>
+          <button id="testLlm" class="btn ghost">测试连接</button>
+        </div>
+        <p id="llmState" class="hint"></p>
+      </div>
+
+      <div class="card">
+        <h2>本机用量</h2>
+        <div id="llmStats" class="muted small"></div>
+      </div>
+
+      <div class="card">
+        <h2>安全说明</h2>
+        <ul class="plain">
+          <li>Key 默认只放 sessionStorage，关掉标签页即失效；勾选"记住"后才落 localStorage。</li>
+          <li>页面启用 CSP，只允许加载本站脚本，不接受内联脚本。</li>
+          <li>任何浏览器端直连都可能被同源脚本读取 Key——如果你介意，用本地 Ollama 或服务端代理。</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <a href="./docs/AUDIT.md">重构说明</a>
+    <a href="./PRIVACY.md">隐私</a>
+    <a href="./TERMS.md">条款与退款</a>
+    <a href="https://github.com/Fnhiq23/agi-engine-v2">源码</a>
+    <span class="muted small">MIT · 数据不出本机</span>
+  </footer>
+  <div id="toast" class="toast"></div>
+</section>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>
