@@ -99,6 +99,9 @@ function track(event, props = {}) {
   }
 }
 
+// 工具箱等其他模块复用同一个埋点出口，避免两套事件表
+window.__agiTrack = track;
+
 /* ── 渲染：通用 ── */
 const $ = (id) => document.getElementById(id);
 
@@ -212,24 +215,21 @@ function renderPro() {
   } else {
     box.innerHTML = `
       <div class="badge">免费版</div>
-      <p class="muted">专业版解锁：不限记忆条数、不限对话、优先模型建议。所有数据仍然只在本机。</p>`;
+      <p class="muted">Pro 解决的是"带走"：不限条数的记忆、完整上下文包、加密备份。数据仍然只在本机。</p>`;
     $('planCards').hidden = false;
   }
 
   const configured = Boolean(CONFIG.checkoutUrl);
   const note = $('checkoutNote');
+  const btn = $('buyPro');
   if (configured) {
-    note.textContent = '付款完成后，会由发码服务向你的邮箱发送授权码，在本页激活。';
-    $('buyMonthly').disabled = false;
-    $('buyAnnual').disabled = false;
-    $('buyMonthly').textContent = `订阅月度 $${CONFIG.priceMonthly}`;
-    $('buyAnnual').textContent = `订阅年度 $${CONFIG.priceAnnual}`;
+    note.textContent = `付款后凭订单号/邮箱核发授权码（也可以接自动发码，见 docs/STRATEGY.md）。首发价 $${CONFIG.priceOneTime}，标准价 $${CONFIG.priceRegular}。`;
+    btn.disabled = false;
+    btn.textContent = `买断 Pro · $${CONFIG.priceOneTime}`;
   } else {
     note.textContent = '购买通道尚未接入（config.js 里 checkoutUrl 为空）。当前无法购买，也不会出现假按钮。';
-    $('buyMonthly').disabled = true;
-    $('buyAnnual').disabled = true;
-    $('buyMonthly').textContent = '购买通道未接入';
-    $('buyAnnual').textContent = '购买通道未接入';
+    btn.disabled = true;
+    btn.textContent = '购买通道未接入';
   }
 }
 
@@ -395,14 +395,13 @@ function checkAchievements() {
   }
 }
 
-function buyPlan(period) {
-  const url = period === 'annual' ? (CONFIG.checkoutUrlAnnual || CONFIG.checkoutUrl) : CONFIG.checkoutUrl;
-  if (!url) {
+function buyPro() {
+  if (!CONFIG.checkoutUrl) {
     toast('购买通道未接入。');
     return;
   }
-  window.open(url, '_blank', 'noopener');
-  track('checkout_open', { period });
+  window.open(CONFIG.checkoutUrl, '_blank', 'noopener');
+  track('checkout_open', { plan: 'lifetime' });
 }
 
 /* ── 事件绑定 ── */
@@ -422,6 +421,7 @@ function bind() {
       if (action === 'clearEnt') {
         clearEntitlement();
         renderPro();
+        renderHeader();
         toast('已解除本机授权');
       }
       if (action === 'clearKey') {
@@ -437,8 +437,7 @@ function bind() {
   });
 
   $('claimBtn').addEventListener('click', claimDaily);
-  $('buyMonthly').addEventListener('click', () => buyPlan('monthly'));
-  $('buyAnnual').addEventListener('click', () => buyPlan('annual'));
+  $('buyPro').addEventListener('click', buyPro);
 
   $('memoryForm').addEventListener('submit', (e) => {
     e.preventDefault();
