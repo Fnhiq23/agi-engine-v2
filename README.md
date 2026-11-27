@@ -109,3 +109,20 @@ docs/DEPLOY.md            Pages 部署与自定义域名
 ## License
 
 MIT，见 [LICENSE](./LICENSE)。
+
+---
+
+## 🎁 Side project: GitWrapped
+
+Ever wondered how much code you actually shipped in the last 90 days?
+GitHub knows, but it won't tell you — it just shows a grid of green squares.
+
+I built **GitWrapped**: type a GitHub username, and your browser draws a
+1080×1350 card — commit count, most active repo, active days, longest streak.
+No login, no token, no backend, nothing stored. Runs entirely client-side,
+so it costs $0 no matter how many people use it.
+
+- 🔗 **[Generate your GitWrapped card](https://fnhiq23.github.io/gitwrapped/)**
+- ⭐ [Open source (MIT)](https://github.com/Fnhiq23/gitwrapped)
+
+*(Free cards carry a small watermark with my URL — that's how this spreads.)*
