@@ -1,15 +1,14 @@
 /* 授权公钥（仅公钥，可公开）
  *
- * 当前是【演示密钥】：仓库内 demo/demo-private.jwk 是它的私钥，
- * 仅用于让你立刻体验 Pro 与授权流程，到期 2026-12-31。
+ * 已于 2026-11-27 轮换为正式密钥（私钥在 keys/private.jwk，仅本机、已 gitignore）。
+ * 轮换原因：此前的演示私钥曾随仓库公开，任何人都能自行签票。
  *
- * 正式发售前必须替换：
- *   node tools/license.mjs keygen          # 生成你自己的密钥对（私钥在 keys/，已 gitignore）
- * 把命令打印出来的那一行公钥贴到下面，再删掉 demo/ 目录。
+ * 再轮换：node tools/license.mjs keygen → 把打印的那一行公钥贴到这里 → npm run build
+ * 注意：轮换后旧授权码全部失效，已售出的码需要重发。
  */
 export const LICENSE_PUBLIC_JWK = {
   kty: 'EC',
-  x: 'AtvBnoDy84o8nBwepDbxHgwCzvHdZKN8lI2Cs0f0Yr0',
-  y: 'y8nBY36rxSYgPAeipZoJUjpvgew3XmaeMP5n9pT8pxw',
+  x: '2L0Mh_pJ10kloauYPdxi-fwMnFQsKNsudnABO7gKF-Y',
+  y: 'NXsuWTuxGGPp-uSAf2fEkp16ecBG5WI9ozTxwI-CaR4',
   crv: 'P-256',
 };
