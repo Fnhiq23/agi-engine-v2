@@ -1,26 +1,39 @@
-# 部署（GitHub Pages）
+# 部署说明（2026-11-27 更新）
 
-本仓库是纯静态站点，没有构建步骤，因此用 Pages 的「分支模式」最稳（不需要 Action 权限）。
+## 当前线上地址（EdgeOne Pages，已可用）
 
-## 一次性设置
+**https://mcp.edgeone.site/share/Sc7rhlJ2Qu-Ef32mwdFMK**
 
-1. 打开 `Settings → Pages`
-2. Source 选 **Deploy from a branch**
-3. Branch 选 `main`，目录选 `/ (root)`，保存
-4. 等 1 分钟左右，站点出现在 `https://fnhiq23.github.io/agi-engine-v2/`
+实现方式：只部署一个 11 KB 的 `site/index.html`，CSS 与 JS 全部通过 jsDelivr 指向本仓库：
 
-## 为什么不用 Actions 部署
-
-`deploy-pages` 需要 Pages 站点已经存在，仓库内的 `GITHUB_TOKEN` 无法自动创建 Pages 站点；本仓库的 `ci.yml` 只负责跑测试，不碰部署，避免出现"每次 push 都红"的假失败。
-
-## 自定义域名
-
-在 Pages 页面填 Custom domain，并在 DNS 添加 CNAME 指向 `fnhiq23.github.io`；勾选 Enforce HTTPS。
-
-## 本地预览
-
-```bash
-npx serve .      # 或 python3 -m http.server 8080
+```
+https://cdn.jsdelivr.net/gh/Fnhiq23/agi-engine-v2@main/js/app.js
+https://cdn.jsdelivr.net/gh/Fnhiq23/agi-engine-v2@main/assets/app.css
 ```
 
-不要用 `file://` 打开：ES module 与 CSP 都需要 http 源。
+因此：**改仓库就是改线上**（jsDelivr 缓存约 12 小时；要立即生效就把 `site/index.html` 重新部署一次）。
+
+## GitHub Pages（可选，需仓库主人手动开启一次）
+
+仓库内 `GITHUB_TOKEN` 无建站权限，workflow 里 `enable-pages` 无效（已试三次，18–20 秒失败）。手动路径：
+
+Settings → Pages → Build and deployment → Source: **Deploy from a branch** → Branch: `main` / folder: `/(root)`。
+
+开启后地址为 `https://fnhiq23.github.io/agi-engine-v2/`，与 EdgeOne 版跑同一份代码。
+
+## 单文件版（无托管也能用）
+
+```bash
+npm i --no-save esbuild
+npm run build          # 产出 dist/index.html（约 67 KB，双击即用）
+```
+
+## CI
+
+`.github/workflows/ci.yml`：Node 20 → `npm run check` → `npm test`。仓库内代码与本地逐字节一致，本地 23/23 通过。
+
+## 已知限制
+
+- 离线授权依赖 WebCrypto，需要安全上下文（https / localhost / 部分浏览器的 file:）。
+- EdgeOne 会在页面尾部注入一个"部署按钮"脚本，本页 CSP 会拦掉它，不影响功能。
+- `demo/` 下是演示私钥，任何人可签票；**发第一单前必须 `npm run keygen` 换公钥并删除 `demo/`**。
