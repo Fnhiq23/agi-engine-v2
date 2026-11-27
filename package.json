@@ -1,13 +1,14 @@
 {
   "name": "agi-engine-v2",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "description": "把你和 AI 说过的话，编译成一份任何模型都能读、加密可带走的记忆资产。",
   "license": "MIT",
   "scripts": {
     "test": "node --test test/*.test.js",
-    "check": "node --check js/core.js && node --check js/config.js && node --check js/llm.js && node --check js/entitlement.js && node --check js/license.js && node --check js/license-pubkey.js && node --check js/compiler.js && node --check js/vault.js && node --check js/app.js && node --check js/toolkit.js && node --check tools/license.mjs",
+    "check": "node --check js/core.js && node --check js/config.js && node --check js/llm.js && node --check js/entitlement.js && node --check js/license.js && node --check js/license-pubkey.js && node --check js/compiler.js && node --check js/vault.js && node --check js/app.js && node --check js/toolkit.js && node --check tools/license.mjs && node --check tools/build.mjs",
+    "build": "node tools/build.mjs",
     "keygen": "node tools/license.mjs keygen",
     "issue": "node tools/license.mjs issue"
   },

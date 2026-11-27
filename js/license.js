@@ -50,6 +50,15 @@ export async function verifySignedKey(input, publicJwk, { now = Date.now(), prod
   if (!publicJwk || !publicJwk.x || !publicJwk.y) {
     return { ok: false, reason: 'NO_PUBKEY', message: '本应用还未配置授权公钥，无法激活。' };
   }
+  // WebCrypto 只在安全上下文可用（https / localhost / file: 的部分浏览器）。
+  // 缺失时给出明确原因，而不是让用户看到"签名无效"这种误导性错误。
+  if (typeof crypto === 'undefined' || !crypto.subtle) {
+    return {
+      ok: false,
+      reason: 'NO_CRYPTO',
+      message: '当前打开方式不支持 WebCrypto，授权码无法校验。请用 https 地址或 localhost 打开（不要用 http 或内嵌预览）。',
+    };
+  }
 
   let ok = false;
   try {
