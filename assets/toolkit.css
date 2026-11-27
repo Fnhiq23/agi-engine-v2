@@ -1,0 +1,15 @@
+/* 工具箱局部样式：只补 app.css 没覆盖到的三处（预览框、口令框、警示文案） */
+#tkPass { width: 100%; margin-top: 12px; }
+#tkPreview {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: 12px/1.65 ui-monospace, SFMono-Regular, Menlo, monospace;
+  resize: vertical;
+}
+#tkPreview::placeholder { color: var(--muted); }
+.hint.warn { color: var(--warn); }
